@@ -1,0 +1,28 @@
+{
+    "dependencies": [
+    ],
+    "license": {
+        "file": "LICENSE",
+        "name": "BSD_3_CLAUSE"
+    },
+    "prcFile": "",
+    "priFile": "qsslserver.pri",
+    "priIncludes": [
+    ],
+    "publishers": {
+        "qpm": {
+            "author": {
+                "email": "skycoder42.de@gmx.de",
+                "name": "Skycoder"
+            },
+            "description": "An extension of QTcpServer to support ssl. The counterpart to QSslSocket",
+            "name": "de.skycoder42.qsslserver",
+            "repository": {
+                "type": "GITHUB",
+                "url": "https://github.com/Skycoder42/QSslServer.git"
+            },
+            "webpage": "https://github.com/Skycoder42/QSslServer"
+        }
+    },
+    "source": false
+}
