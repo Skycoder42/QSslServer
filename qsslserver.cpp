@@ -7,14 +7,12 @@
 
 QSslServer::QSslServer(QObject *parent) :
 	QTcpServer(parent),
-	_configuration(QSslConfiguration::defaultConfiguration()),
-	_lastError(QAbstractSocket::UnknownSocketError),
-	_lastSslErrors()
+	_configuration(QSslConfiguration::defaultConfiguration())
 {}
 
-QSslSocket *QSslServer::nextPendingSslConnection()
+QSslSocket *QSslServer::nextPendingConnection()
 {
-	return qobject_cast<QSslSocket*>(nextPendingConnection());
+	return qobject_cast<QSslSocket*>(QTcpServer::nextPendingConnection());
 }
 
 void QSslServer::addCaCertificate(const QSslCertificate &certificate)
@@ -119,6 +117,34 @@ bool QSslServer::setPrivateKey(const QString &fileName, QSsl::KeyAlgorithm algor
 	return ret;
 }
 
+bool QSslServer::importPkcs12(const QString &path, const QByteArray &passPhrase, bool addCaCerts)
+{
+	auto ret = false;
+	QFile file(path);
+	if(file.open(QIODevice::ReadOnly)) {
+		QSslKey key;
+		QSslCertificate cert;
+		QList<QSslCertificate> caCerts;
+		ret = QSslCertificate::importPkcs12(&file, &key, &cert, &caCerts, passPhrase);
+		file.close();
+
+		if(ret) {
+			if(!caCerts.isEmpty()) {
+				if(addCaCerts)
+					addCaCertificates(caCerts);
+				else
+					_configuration.setCaCertificates(caCerts);
+			}
+			if(!cert.isNull())
+				_configuration.setLocalCertificate(cert);
+			if(!key.isNull())
+				_configuration.setPrivateKey(key);
+		}
+	}
+
+	return ret;
+}
+
 QList<QSslCipher> QSslServer::ciphers() const
 {
 	return _configuration.ciphers();
@@ -161,64 +187,18 @@ QSslConfiguration QSslServer::sslConfiguration() const
 	return _configuration;
 }
 
-QAbstractSocket::SocketError QSslServer::clientError() const
-{
-	return _lastError;
-}
-
-QList<QSslError> QSslServer::clientSslErrors() const
-{
-	return _lastSslErrors;
-}
-
 void QSslServer::incomingConnection(qintptr handle)
 {
 	//Create Socket
 	auto socket = new QSslSocket();
 	if (!socket->setSocketDescriptor(handle)) {
-		_lastError = socket->error();
+		emit acceptError(socket->error());
 		delete socket;
-		emit clientError(_lastError);
 		return;
 	}
-
-	//Connects
-	connect(socket, &QSslSocket::encrypted,
-			this, &QSslServer::socketReady);
-	connect(socket, QOverload<QAbstractSocket::SocketError>::of(&QSslSocket::error),
-			this, &QSslServer::socketErrors);
-	connect(socket, QOverload<const QList<QSslError> &>::of(&QSslSocket::sslErrors),
-			this, &QSslServer::sslErrors);
 
 	//set ssl data
 	socket->setSslConfiguration(_configuration);
 	socket->startServerEncryption();
-}
-
-void QSslServer::socketReady()
-{
-	auto socket = qobject_cast<QSslSocket*>(sender());
-	if(socket) {
-		socket->disconnect(this);
-		addPendingConnection(socket);
-		emit newConnection();
-	}
-}
-
-void QSslServer::socketErrors(QAbstractSocket::SocketError error)
-{
-	_lastError = error;
-	emit clientError(error);
-	auto socket = qobject_cast<QSslSocket*>(sender());
-	if(socket)
-		socket->deleteLater();
-}
-
-void QSslServer::sslErrors(const QList<QSslError> &errors)
-{
-	_lastSslErrors = errors;
-	emit clientSslErrors(errors);
-	auto socket = qobject_cast<QSslSocket*>(sender());
-	if(socket)
-		socket->deleteLater();
+	addPendingConnection(socket);
 }

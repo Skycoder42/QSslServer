@@ -11,7 +11,7 @@ class QSslServer : public QTcpServer
 public:
 	explicit QSslServer(QObject *parent = nullptr);
 
-	QSslSocket *nextPendingSslConnection();
+	QSslSocket *nextPendingConnection();
 
 	//Ca-Certificates
 	void addCaCertificate(const QSslCertificate &certificate);
@@ -35,6 +35,11 @@ public:
 					   QSsl::EncodingFormat format = QSsl::Pem,
 					   const QByteArray &passPhrase = QByteArray());
 
+	//p12
+	bool importPkcs12(const QString &path,
+					  const QByteArray &passPhrase = QByteArray(),
+					  bool addCaCerts = true);
+
 	//Ciphers and protocols
 	QList<QSslCipher> ciphers() const;
 	void setCiphers(const QList<QSslCipher> &ciphers);
@@ -43,30 +48,14 @@ public:
 	void setProtocol(QSsl::SslProtocol protocol);
 
 	//Configuration
-	void setSslConfiguration(const QSslConfiguration &_configuration);
+	void setSslConfiguration(const QSslConfiguration &configuration);
 	QSslConfiguration sslConfiguration() const;
-
-	//Errors
-	QAbstractSocket::SocketError clientError() const;
-	QList<QSslError> clientSslErrors() const;
-
-signals:
-	void newSslConnection();
-	void clientError(QAbstractSocket::SocketError error);
-	void clientSslErrors(const QList<QSslError> &errors);
 
 protected:
 	void incomingConnection(qintptr handle);
 
-private slots:
-	void socketReady();
-	void socketErrors(QAbstractSocket::SocketError error);
-	void sslErrors(const QList<QSslError> &errors);
-
 private:
 	QSslConfiguration _configuration;
-	QAbstractSocket::SocketError _lastError;
-	QList<QSslError> _lastSslErrors;
 };
 
 #endif // QSSLSERVER_H

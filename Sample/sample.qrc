@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>certs/server.p12</file>
+        <file>certs/root.crt</file>
+    </qresource>
+</RCC>
