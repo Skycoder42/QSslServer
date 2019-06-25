@@ -1,8 +1,8 @@
 #include "server.h"
 
 Server::Server(QObject *parent) :
-	QObject(parent),
-	server(new QSslServer(this))
+	QObject{parent},
+	server{new QSslServer{this}}
 {
 	if(!server->importPkcs12(QStringLiteral(":/certs/server.p12")))
 		qCritical() << " >>> SERVER ERROR: Failed to import certificates";
@@ -41,8 +41,8 @@ void Server::newConnection()
 			qCritical() << " >>> SERVER SOCKET ERROR:" << socket->errorString();
 		});
 		connect(socket, QOverload<const QList<QSslError> &>::of(&QSslSocket::sslErrors),
-				this, [socket](QList<QSslError> errors){
-			for(auto error : errors)
+				this, [](const QList<QSslError> &errors){
+			for(const auto &error : errors)
 				qCritical() << " >>> SERVER SOCKET SSL ERROR:" << error.errorString();
 		});
 	}

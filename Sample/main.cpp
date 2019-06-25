@@ -7,24 +7,25 @@ int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
 
-	QThread mThread;
-	QObject::connect(qApp, &QApplication::aboutToQuit, &mThread, [&](){
-		mThread.quit();
-		mThread.wait();
+	QThread serverThread;
+	QObject::connect(qApp, &QApplication::aboutToQuit, &serverThread, [&](){
+		serverThread.quit();
+		serverThread.wait();
 	});
 
-	auto svr = new Server();
-	svr->moveToThread(&mThread);
-	QObject::connect(&mThread, &QThread::finished,
+	auto svr = new Server{};
+	svr->moveToThread(&serverThread);
+	QObject::connect(&serverThread, &QThread::finished,
 					 svr, &Server::stop);
-	QObject::connect(&mThread, &QThread::started,
+	QObject::connect(&serverThread, &QThread::started,
 					 svr, &Server::start);
 
 	MainWindow w;
 	QObject::connect(svr, &Server::connected,
-					 &w, &MainWindow::connectTo);
+					 &w, &MainWindow::connectTo,
+					 Qt::QueuedConnection);
 
-	mThread.start();
+	serverThread.start();
 	w.show();
 	return a.exec();
 }

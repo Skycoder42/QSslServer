@@ -5,54 +5,56 @@
 #include <QSslSocket>
 #include <QSslConfiguration>
 
-class QSslServer : public QTcpServer
+class Q_SSL_SERVER_EXPORT QSslServer : public QTcpServer
 {
 	Q_OBJECT
+
 public:
 	explicit QSslServer(QObject *parent = nullptr);
 
 	QSslSocket *nextPendingConnection();
 
-	//Ca-Certificates
-	void addCaCertificate(const QSslCertificate &certificate);
-	bool addCaCertificate(const QString &path, QSsl::EncodingFormat format = QSsl::Pem);
-	void addCaCertificates(const QList<QSslCertificate> &certificates);
-	QList<QSslCertificate> caCertificates() const;
-	void setCaCertificates(const QList<QSslCertificate> &certificates);
+	// SSL configuration
+	QSslConfiguration sslConfiguration() const;
+	void setSslConfiguration(QSslConfiguration configuration);
 
-	//Local Certificates
-	QSslCertificate localCertificate() const;
-	QList<QSslCertificate> localCertificateChain() const;
-	void setLocalCertificate(const QSslCertificate &certificate);
-	bool setLocalCertificate(const QString &path, QSsl::EncodingFormat format = QSsl::Pem);
+	// Certificate
 	void setLocalCertificateChain(const QList<QSslCertificate> &localChain);
+	void setLocalCertificateChain(const QString &fileName,
+								  QSsl::EncodingFormat format = QSsl::Pem,
+								  QRegExp::PatternSyntax syntax = QRegExp::FixedString);
+	QList<QSslCertificate> localCertificateChain() const;
 
-	//PrivKey
-	QSslKey privateKey() const;
+	void setLocalCertificate(const QSslCertificate &certificate);
+	void setLocalCertificate(const QString &fileName,
+							 QSsl::EncodingFormat format = QSsl::Pem);
+	QSslCertificate localCertificate() const;
+
+	// Private keys
 	void setPrivateKey(const QSslKey &key);
-	bool setPrivateKey(const QString &fileName,
+	void setPrivateKey(const QString &fileName,
 					   QSsl::KeyAlgorithm algorithm = QSsl::Rsa,
 					   QSsl::EncodingFormat format = QSsl::Pem,
-					   const QByteArray &passPhrase = QByteArray());
+					   const QByteArray &passPhrase = QByteArray{});
+	QSslKey privateKey() const;
 
-	//p12
+	// CA settings
+	bool addCaCertificates(const QString &path,
+						   QSsl::EncodingFormat format = QSsl::Pem,
+						   QRegExp::PatternSyntax syntax = QRegExp::FixedString);
+	void addCaCertificate(const QSslCertificate &certificate);
+	void addCaCertificates(const QList<QSslCertificate> &certificates);
+
+	// PKCS#12
 	bool importPkcs12(const QString &path,
 					  const QByteArray &passPhrase = QByteArray(),
-					  bool addCaCerts = true);
+					  bool replaceCaCerts = false);
 
-	//Ciphers and protocols
-	QList<QSslCipher> ciphers() const;
-	void setCiphers(const QList<QSslCipher> &ciphers);
-	void setCiphers(const QString &ciphers);
 	QSsl::SslProtocol protocol() const;
 	void setProtocol(QSsl::SslProtocol protocol);
 
-	//Configuration
-	void setSslConfiguration(const QSslConfiguration &configuration);
-	QSslConfiguration sslConfiguration() const;
-
 protected:
-	void incomingConnection(qintptr handle);
+	void incomingConnection(qintptr handle) override;
 
 private:
 	QSslConfiguration _configuration;

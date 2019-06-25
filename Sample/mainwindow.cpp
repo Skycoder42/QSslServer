@@ -4,9 +4,9 @@
 #include <QHostAddress>
 
 MainWindow::MainWindow(QWidget *parent) :
-	QMainWindow(parent),
-	ui(new Ui::MainWindow),
-	socket(new QSslSocket(this))
+	QMainWindow{parent},
+	ui{new Ui::MainWindow},
+	socket{new QSslSocket{this}}
 {
 	ui->setupUi(this);
 
@@ -27,7 +27,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::connectTo(quint16 port)
 {
-	socket->connectToHostEncrypted("127.0.0.1", port);
+	socket->connectToHostEncrypted(QStringLiteral("127.0.0.1"), port);
 }
 
 void MainWindow::on_sendButton_clicked()
@@ -48,6 +48,6 @@ void MainWindow::error()
 
 void MainWindow::sslErrors(const QList<QSslError> &errors)
 {
-	for(auto error : errors)
+	for(const auto &error : errors)
 		ui->plainTextEdit->appendPlainText(QStringLiteral(" >>> SSL-ERROR: %1").arg(error.errorString()));
 }

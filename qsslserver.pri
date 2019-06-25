@@ -1,12 +1,10 @@
 INCLUDEPATH += $$PWD
 
-qpmx_static: message(configured for qpmx build)
-else: message(configured for source build)
-
 HEADERS += \
-    $$PWD/qsslserver.h
+	$$PWD/qsslserver.h
 
 SOURCES += \
-    $$PWD/qsslserver.cpp
+	$$PWD/qsslserver.cpp
 
-TRANSLATIONS +=
+QDEP_PACKAGE_EXPORTS += Q_SSL_SERVER_EXPORT
+!qdep_build: DEFINES += "Q_SSL_SERVER_EXPORT="
