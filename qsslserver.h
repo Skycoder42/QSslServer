@@ -22,7 +22,7 @@ public:
 	void setLocalCertificateChain(const QList<QSslCertificate> &localChain);
 	void setLocalCertificateChain(const QString &fileName,
 								  QSsl::EncodingFormat format = QSsl::Pem,
-								  QRegExp::PatternSyntax syntax = QRegExp::FixedString);
+								  QSslCertificate::PatternSyntax syntax = QSslCertificate::PatternSyntax::FixedString);
 	QList<QSslCertificate> localCertificateChain() const;
 
 	void setLocalCertificate(const QSslCertificate &certificate);
@@ -41,7 +41,7 @@ public:
 	// CA settings
 	bool addCaCertificates(const QString &path,
 						   QSsl::EncodingFormat format = QSsl::Pem,
-						   QRegExp::PatternSyntax syntax = QRegExp::FixedString);
+						   QSslCertificate::PatternSyntax syntax = QSslCertificate::PatternSyntax::FixedString);
 	void addCaCertificate(const QSslCertificate &certificate);
 	void addCaCertificates(const QList<QSslCertificate> &certificates);
 

@@ -30,7 +30,7 @@ void QSslServer::setLocalCertificateChain(const QList<QSslCertificate> &localCha
 	_configuration.setLocalCertificateChain(localChain);
 }
 
-void QSslServer::setLocalCertificateChain(const QString &fileName, QSsl::EncodingFormat format, QRegExp::PatternSyntax syntax)
+void QSslServer::setLocalCertificateChain(const QString &fileName, QSsl::EncodingFormat format, QSslCertificate::PatternSyntax syntax)
 {
 	_configuration.setLocalCertificateChain(QSslCertificate::fromPath(fileName, format, syntax));
 }
@@ -82,7 +82,7 @@ QSslKey QSslServer::privateKey() const
 	return _configuration.privateKey();
 }
 
-bool QSslServer::addCaCertificates(const QString &path, QSsl::EncodingFormat format, QRegExp::PatternSyntax syntax)
+bool QSslServer::addCaCertificates(const QString &path, QSsl::EncodingFormat format, QSslCertificate::PatternSyntax syntax)
 {
 	auto certs = QSslCertificate::fromPath(path, format, syntax);
 	if (!certs.isEmpty()) {
